@@ -37,4 +37,21 @@ package body P_Photo is
     end loop;
   end afficher;
 
+  function chercheap(l : in ta_ap; nomap : in string) return ta_ap is
+  begin
+    if l = null then
+      return null;
+    elsif l.all.modele.all = nomap then
+      return l;
+    else
+      return chercheap (l.all.suivant, nomap);
+    end if;
+  end chercheap;
+
+  procedure modifierprix(l : in ta_ap; prix : in positive) is
+  begin
+    pragma Assert (l /= null);
+    l.all.prix := prix;
+  end modifierprix;
+
 end P_photo;

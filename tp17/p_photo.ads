@@ -25,5 +25,7 @@ package p_photo is
   procedure creerliste(f : in out p_appareil_io.file_type; l : out ta_ap);
   procedure creerliste(filename : string; l : out ta_ap);
   procedure afficher(l : ta_ap);
+  function chercheap(l : in ta_ap; nomap : in string) return ta_ap;
+  procedure modifierprix(l : in ta_ap; prix : in positive);
 
 end p_photo;

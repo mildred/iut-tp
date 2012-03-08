@@ -1,1 +1,1 @@
-gnatmake -Ibib $1 -o $3
+gnatmake -Ibib -gnat05 $1 -o $3
