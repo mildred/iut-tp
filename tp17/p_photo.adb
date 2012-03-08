@@ -54,4 +54,18 @@ package body P_Photo is
     l.all.prix := prix;
   end modifierprix;
 
+  procedure inseretete(l : in out ta_ap; nom : string; prix : positive) is
+  begin
+    l := new tr_ap'(new string'(nom), prix, l);
+  end inseretete;
+
+  procedure inserefin(l : in out ta_ap; nom : string; prix : positive) is
+  begin
+    if l = null then
+      l := new tr_ap'(new string'(nom), prix, l);
+    else
+      inserefin(l.all.suivant, nom, prix);
+    end if;
+  end inserefin;
+
 end P_photo;

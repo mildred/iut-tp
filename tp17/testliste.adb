@@ -2,7 +2,7 @@ with p_photo; use p_photo;
 with ada.text_io; use ada.text_io;
 
 procedure testliste is
-  subtype t_choix is integer range 0 .. 3;
+  subtype t_choix is integer range 0 .. 5;
   l : ta_ap;
   
   function menu return t_choix is
@@ -13,6 +13,8 @@ procedure testliste is
     put_line("    1. Ouvrir un fichier");
     put_line("    2. Afficher Liste");
     put_line("    3. Modifier le prix d'un appareil");
+    put_line("    4. Insertion d'un appareil en tête");
+    put_line("    5. Insertion d'un appareil en fin");
     loop
       put("choix: ");
       declare
@@ -29,7 +31,6 @@ procedure testliste is
   end menu;
   
   function get_integer (Message : string := "") return integer is
-    n : integer;
   begin
     loop
       begin
@@ -44,12 +45,15 @@ procedure testliste is
     end loop;
   end get_integer;
   
+  choix : t_choix;
+  
 begin
   put_line ("Ouverture de app.dat");
   creerliste("app.dat", l);
 
   loop
-    case menu is
+    choix := menu;
+    case choix is
       when 0 =>
         exit;
       when 1 =>
@@ -72,6 +76,18 @@ begin
             put_line ("Appareil " & s & " inexistant");
           else
             modifierprix(ap, get_integer("Nouveau prix: "));
+          end if;
+        end;
+      when 4 .. 5 =>
+        put("Nom de l'appareil: ");
+        declare
+          nom : constant string := get_line;
+          prix : positive := get_integer("Prix: ");
+        begin
+          if choix = 4 then
+            inseretete(l, nom, prix);
+          else
+            inserefin(l, nom, prix);
           end if;
         end;
     end case;
