@@ -1,0 +1,1 @@
+gnatmake $1
