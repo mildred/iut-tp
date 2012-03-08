@@ -2,7 +2,7 @@ with p_photo; use p_photo;
 with ada.text_io; use ada.text_io;
 
 procedure testliste is
-  subtype t_choix is integer range 0 .. 5;
+  subtype t_choix is integer range 0 .. 6;
   l : ta_ap;
   
   function menu return t_choix is
@@ -15,6 +15,7 @@ procedure testliste is
     put_line("    3. Modifier le prix d'un appareil");
     put_line("    4. Insertion d'un appareil en tête");
     put_line("    5. Insertion d'un appareil en fin");
+    put_line("    6. Tri de la liste");
     loop
       put("choix: ");
       declare
@@ -90,6 +91,8 @@ begin
             inserefin(l, nom, prix);
           end if;
         end;
+      when 6 =>
+        trilisteprix(l);
     end case;
   end loop;
 

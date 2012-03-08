@@ -29,5 +29,7 @@ package p_photo is
   procedure modifierprix(l : in ta_ap; prix : in positive);
   procedure inseretete(l : in out ta_ap; nom : string; prix : positive);
   procedure inserefin(l : in out ta_ap; nom : string; prix : positive);
+  procedure inseretrieprix(l : in out ta_ap; article : in tr_ap);
+  procedure trilisteprix(l : in out ta_ap);
 
 end p_photo;

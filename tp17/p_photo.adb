@@ -68,4 +68,27 @@ package body P_Photo is
     end if;
   end inserefin;
 
+  procedure inseretrieprix(l : in out ta_ap; article : in tr_ap) is
+  begin
+    if l = null or else l.all.modele.all > article.modele.all then
+      l := new tr_ap'
+        (modele  => article.modele,
+         prix    => article.prix,
+         suivant => l);
+    else
+      inseretrieprix(l.all.suivant, article);
+    end if;
+  end inseretrieprix;
+
+  procedure trilisteprix(l : in out ta_ap) is
+    liste1 : ta_ap := l;
+    liste2 : ta_ap := null;
+  begin
+    while liste1 /= null loop
+      inseretrieprix (liste2, liste1.all);
+      liste1 := liste1.all.suivant;
+    end loop;
+    l := liste2;
+  end trilisteprix;
+
 end P_photo;
