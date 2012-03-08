@@ -1,17 +1,29 @@
-with sequential_io;
-With P_Esiut ; use P_Esiut ;
- 
-package P_Photo is
- 
-   -- TYPES pour le fichier binaire d'appareils photo (app.dat)----------------
-   type TR_Appareil is record
-      Modele : string(1..20);
-      NbcarModele : integer;
-      Prix : Positive;
-   end record;
- 
-   package P_Appareil_Io is new Sequential_Io(TR_Appareil); use P_Appareil_Io;
- 
+with ada.sequential_io;
+with p_esiut;       use p_esiut ;
 
- 
-end P_photo;
+package p_photo is
+
+  -- types pour le fichier binaire d'appareils photo (app.dat)----------------
+  type tr_appareil is record
+    modele      : string(1..20);
+    nbcarmodele : integer;
+    prix        : positive;
+  end record;
+
+  package p_appareil_io is new ada.sequential_io(tr_appareil); use p_appareil_io;
+
+  type ta_string is access string;
+  type tr_ap;
+  type ta_ap is access tr_ap;
+  type tr_ap is
+    record
+      modele  : ta_string;
+      prix    : positive;
+      suivant : ta_ap;
+    end record;
+
+  procedure creerliste(f : in out p_appareil_io.file_type; l : out ta_ap);
+  procedure creerliste(filename : string; l : out ta_ap);
+  procedure afficher(l : ta_ap);
+
+end p_photo;
