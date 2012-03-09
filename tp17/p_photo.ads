@@ -46,7 +46,10 @@ package p_photo is
     Gamme : T_Gamme;
     Suivant : TA_GP;
     Appareils : TA_AP;
-  end record; 
+  end record;
+  
+  function creersousliste_it(l : ta_ap; binf, bsup : positive) return ta_ap;
+  function creersousliste_rec(l : ta_ap; binf, bsup : positive) return ta_ap;
   
   type TV_EchellePrix is array(T_Gamme) of Positive;
  

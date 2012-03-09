@@ -81,16 +81,51 @@ package body P_Photo is
   end inseretrieprix;
 
   procedure trilisteprix(l : in out ta_ap) is
+    -- je crée un pointeur pour itérer sur la première liste
+    -- je crée une liste vide liste2
     liste1 : ta_ap := l;
     liste2 : ta_ap := null;
   begin
+    -- pour chaque élément de la liste 1, je l'insère de manière triée
     while liste1 /= null loop
       inseretrieprix (liste2, liste1.all);
       liste1 := liste1.all.suivant;
     end loop;
+    -- je remplace la liste donnée en paramètre par la liste triée que je viens
+    -- de créer
     l := liste2;
   end trilisteprix;
- 
+
+  function creersousliste_it(l : ta_ap; binf, bsup : positive) return ta_ap is
+    liste1 : ta_ap := l;
+    liste2 : ta_ap := null;
+  begin
+    -- pareil que trilisteprix sauf que je ne fais l'insertion que si je suis
+    -- entre binf et bsup
+    while liste1 /= null loop
+      if liste1.all.prix >= binf and liste1.all.prix <= bsup then
+        inseretrieprix(liste2, liste1.all);
+      end if;
+      liste1 := liste1.all.suivant;
+    end loop;
+    return liste2;
+  end creersousliste;
+
+  function creersousliste_rec(l : ta_ap; binf, bsup : positive) return ta_ap is
+    liste1 : ta_ap := l;
+    liste2 : ta_ap := null;
+  begin
+    -- pareil que trilisteprix sauf que je ne fais l'insertion que si je suis
+    -- entre binf et bsup
+    while liste1 /= null loop
+      if liste1.all.prix >= binf and liste1.all.prix <= bsup then
+        inseretrieprix(liste2, liste1.all);
+      end if;
+      liste1 := liste1.all.suivant;
+    end loop;
+    return liste2;
+  end creersousliste;
+
   ------------------------------------------------------------------------------
   -- POUR LES EXTENSIONS
   ------------------------------------------------------------------------------
