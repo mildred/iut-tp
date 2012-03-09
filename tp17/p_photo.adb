@@ -70,7 +70,7 @@ package body P_Photo is
 
   procedure inseretrieprix(l : in out ta_ap; article : in tr_ap) is
   begin
-    if l = null or else l.all.modele.all > article.modele.all then
+    if l = null or else l.all.prix > article.prix then
       l := new tr_ap'
         (modele  => article.modele,
          prix    => article.prix,
