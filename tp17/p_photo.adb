@@ -112,11 +112,8 @@ package body P_Photo is
   end creersousliste;
 
   function creersousliste_rec(l : ta_ap; binf, bsup : positive) return ta_ap is
-    liste1 : ta_ap := l;
-    liste2 : ta_ap := null;
+
   begin
-    -- pareil que trilisteprix sauf que je ne fais l'insertion que si je suis
-    -- entre binf et bsup
     while liste1 /= null loop
       if liste1.all.prix >= binf and liste1.all.prix <= bsup then
         inseretrieprix(liste2, liste1.all);
