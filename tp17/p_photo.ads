@@ -48,9 +48,6 @@ package p_photo is
     Appareils : TA_AP;
   end record;
   
-  function creersousliste_it(l : ta_ap; binf, bsup : positive) return ta_ap;
-  function creersousliste_rec(l : ta_ap; binf, bsup : positive) return ta_ap;
-  
   type TV_EchellePrix is array(T_Gamme) of Positive;
  
   EchelledePrix : TV_EchellePrix := (
@@ -67,6 +64,17 @@ package p_photo is
   -- prix des appareils Modere dans l'intervalle [150,200[
   -- prix des appareils ModereX dans l'intervalle [200,300[
   -- etc.
+  
+  function creersousliste_it(l : ta_ap; binf, bsup : positive) return ta_ap;
+  function creersousliste_rec(l : ta_ap; binf, bsup : positive) return ta_ap;
+  function creersousliste(l : ta_ap; binf, bsup : positive) return ta_ap renames creersousliste_rec;
+  -- précondition: l triée par prix
+  
+  procedure creercatalogue(l : in ta_ap; catalogue : out ta_gp);
+  procedure affichecatalogue(cat : in ta_gp);
+  function selection(cat : ta_gp; gamme : t_gamme) return ta_ap;
+  procedure miseajoursoldes(cat : ta_gp; nom : string; remise : positive; success : out boolean);
+  
   -----------------------------------------------------------------------------------------------
   function Gammedeprix(V : in TV_EchellePrix ; P : in Positive) return T_Gamme ;
   -- {} => {résulat = gamme de prix correspondante au prix P d'après l'échelle considérée représentée par V}

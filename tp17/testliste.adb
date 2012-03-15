@@ -31,20 +31,20 @@ procedure testliste is
     end loop;
   end menu;
   
-  function get_integer (Message : string := "") return integer is
+  function get_positive (Message : string := "") return positive is
   begin
     loop
       begin
         if message /= "" then
           put (message);
         end if;
-        return integer'value(get_line);
+        return positive'value(get_line);
       exception
         when constraint_error =>
           null;
       end;
     end loop;
-  end get_integer;
+  end get_positive;
   
   choix : t_choix;
   
@@ -76,14 +76,14 @@ begin
           if ap = null then
             put_line ("Appareil " & s & " inexistant");
           else
-            modifierprix(ap, get_integer("Nouveau prix: "));
+            modifierprix(ap, get_positive("Nouveau prix: "));
           end if;
         end;
       when 4 .. 5 =>
         put("Nom de l'appareil: ");
         declare
           nom : constant string := get_line;
-          prix : positive := get_integer("Prix: ");
+          prix : positive := get_positive("Prix: ");
         begin
           if choix = 4 then
             inseretete(l, nom, prix);

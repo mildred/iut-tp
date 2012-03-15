@@ -99,29 +99,176 @@ package body P_Photo is
   function creersousliste_it(l : ta_ap; binf, bsup : positive) return ta_ap is
     liste1 : ta_ap := l;
     liste2 : ta_ap := null;
+    der2   : ta_ap := null;
+    p      : ta_ap := null;
   begin
     -- pareil que trilisteprix sauf que je ne fais l'insertion que si je suis
     -- entre binf et bsup
     while liste1 /= null loop
       if liste1.all.prix >= binf and liste1.all.prix <= bsup then
-        inseretrieprix(liste2, liste1.all);
+        -- on peut utiliser inserefin, mais cela veut dire reparcourir toute la
+        -- liste2 à chaque fois:
+        --
+        --   inserefin(liste2, liste1.all.nom, liste1.all.prix);
+        --
+        -- on peut aussi directement ajouter au dernier element:
+        begin
+          p := new tr_ap'(liste1.all.modele, liste1.all.prix, null);
+          if der2 /= null then
+            -- ce n'est pas le premier element de liste2, on ajoute
+            der2.all.suivant := p;
+          else
+            -- liste2 est vide, on lui met le premier élément
+            liste2 := p;
+          end if;
+          -- on affecte der2 qui correspond au dernier élément de liste2
+          der2 := p;
+        end;
       end if;
       liste1 := liste1.all.suivant;
     end loop;
     return liste2;
-  end creersousliste;
+  end creersousliste_it;
 
   function creersousliste_rec(l : ta_ap; binf, bsup : positive) return ta_ap is
-
   begin
-    while liste1 /= null loop
-      if liste1.all.prix >= binf and liste1.all.prix <= bsup then
-        inseretrieprix(liste2, liste1.all);
+    -- précondition: l est triée sur les prix
+    if l = null or else l.all.prix > bsup then
+      -- la liste est vide ou on est sûr qu'il n'y aura aucun élément entre binf
+      -- et bsup (on est au dela de bsup), on retourne une liste vide
+      return null;
+    elsif l.all.prix < binf then
+      -- on est avant binf, on continue à parcourir les éléments suivants
+      return creersousliste_rec(l.all.suivant, binf, bsup);
+    else
+      -- on est entre binf et bsup, on copie l'élément en cours dans la liste
+      -- résultat et on continue à traiter les éléments suivants:
+      return new tr_ap'
+        (modele  => l.all.modele,
+         prix    => l.all.prix,
+         suivant => creersousliste_rec (l.all.suivant, binf, bsup));
+      -- (c'est le schéma de création d'une liste dans le sens positif en
+      -- récursif, en l'occurence c'est comme une copie de liste où on ne copie
+      -- que certains éléments)
+    end if;
+  end creersousliste_rec;
+
+
+  procedure creercatalogue(l : in ta_ap; catalogue : out ta_gp) is
+    binf, bsup : positive;
+    der : ta_gp := null;
+    p   : ta_gp := null;
+  begin
+    for gamme in T_Gamme'range loop
+      
+      -- récupère les bornes binf et bsup pour la gamme
+      IntervalledeGamme (EchelledePrix, gamme, binf, bsup);
+      
+      -- crée la cellule de gamme
+      p := new tr_gp'(gamme, null, creersousliste(l, binf, bsup));
+      
+      -- place la cellule de gamme à la suite
+      if der /= null then
+        -- après la dernière cellule si il y a des éléments
+        der.all.suivant := p;
+      else
+        -- au début si la liste est vide
+        catalogue := p;
       end if;
-      liste1 := liste1.all.suivant;
+
+      der := p;
     end loop;
-    return liste2;
-  end creersousliste;
+  end creercatalogue;
+
+  procedure affichecatalogue(cat : in ta_gp) is
+    use ada.text_io;
+  begin
+    if cat /= null then
+      if cat.all.appareils /= null then
+        put_line(cat.all.gamme'img);
+        afficher(cat.all.appareils);
+      end if;
+      affichecatalogue(cat.all.suivant);
+    end if;
+  end affichecatalogue;
+  
+  function selection(cat : ta_gp; gamme : t_gamme) return ta_ap is
+  begin
+    if cat = null or else cat.all.gamme > gamme then
+      return null;
+    elsif cat.all.gamme = gamme then
+      return cat.all.appareils;
+    else
+      return selection(cat.all.suivant, gamme);
+    end if;
+  end selection;
+
+  procedure miseajoursoldes(cat : ta_gp; nom : string; remise : positive; success : out boolean) is
+  
+    procedure extraireap(l : in out ta_ap; nomap : string; res : out ta_ap) is
+      -- presque comme chercheap
+    begin
+      if l = null then
+        res := null;
+      elsif l.all.modele.all = nomap then
+        res := l;
+        l := l.all.suivant; -- on enleve res de l
+      else
+        extraireap (l.all.suivant, nomap, res);
+      end if;
+    end extraireap;
+  
+    function extraireap(cat : ta_gp; nom : string) return ta_ap is
+      ap : ta_ap;
+    begin
+      if cat = null then
+        return null;
+      else
+        extraireap(cat.all.appareils, nom, ap);
+        if ap /= null then
+          return ap;
+        else
+          return extraireap(cat.all.suivant, nom);
+        end if;
+      end if;
+    end extraireap;
+    
+    procedure insereap(l : in out ta_ap; ap : ta_ap) is
+    begin
+      if l = null or else l.all.prix > ap.all.prix then
+        ap.all.suivant := l;
+        l := ap;
+      else
+        insereap(l.all.suivant, ap);
+      end if;
+    end insereap;
+    
+    procedure insereap(cat : ta_gp; ap : ta_ap) is
+      gamme : t_gamme := Gammedeprix(EchelledePrix, ap.all.prix);
+    begin
+      if cat = null or else cat.all.gamme > gamme then
+        success := false; -- la nouvelle gamme n'existe pas
+      elsif cat.all.gamme = gamme then
+        insereap(cat.all.appareils, ap);
+      else
+        insereap(cat.all.suivant, ap);
+      end if;
+    end insereap;
+    
+    ap : ta_ap;
+  
+  begin
+    
+    ap := extraireap(cat, nom);
+    if ap = null then
+      success := false;
+    else
+      success := true;
+      ap.all.prix := ap.all.prix - remise;
+      insereap(cat, ap);
+    end if;
+    
+  end miseajoursoldes;
 
   ------------------------------------------------------------------------------
   -- POUR LES EXTENSIONS
@@ -147,6 +294,6 @@ package body P_Photo is
     else 
       Binf := V(T_Gamme'Pred(Gamme));
     end if;
-  end Intervalledegamme;  
+  end Intervalledegamme;
 
 end P_photo;
