@@ -41,4 +41,5 @@ package p_liste is
    procedure AffichlistMots (ListMots : in TA_Mot ); 
    --spec {ListMots triée}=> {affiche à l'écran la liste des mots de ListMots}
    --------------------------------------------------------------------------
+   function to_string (mot : tr_mot) return string;
 end p_liste;

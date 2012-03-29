@@ -47,19 +47,43 @@ package body p_arbre is
    function Cherchesquel (Rac : in TA_Squel; Forme : in TR_Mot) return TA_Squel is
    -- {} => {Résultat = pointeur sur Forme s'il existe dans l'arbre Rac, nil sinon}
    begin
-    return null;
+    if rac = null then
+      return null;
+    elsif to_string (forme) > to_string (rac.all.squelette) then
+      return Cherchesquel (rac.all.gauche, forme);
+    elsif to_string (forme) < to_string (rac.all.squelette) then
+      return Cherchesquel (rac.all.droite, forme);
+    else
+      return rac;
+    end if;
    end Cherchesquel;
    -------------------------------------------------------------------------
    procedure Ajoutsquel (Rac : in out TA_Squel; Forme : in TR_Mot ) is
    -- {} => {le squelette Forme est inséré dans l'arbre (s'il n'existait pas déjà)}
    begin
-    null;
+    if rac = null then
+      rac := new TR_Squel;
+      rac.all.squelette := forme;
+      rac.all.listMots := null;
+      rac.all.gauche := null;
+      rac.all.droite := null;
+    elsif to_string (forme) > to_string (rac.all.squelette) then
+      Ajoutsquel (rac.all.gauche, forme);
+    elsif to_string (forme) < to_string (rac.all.squelette) then
+      Ajoutsquel (rac.all.droite, forme);
+    end if;
    end Ajoutsquel;
    -------------------------------------------------------------------------
    procedure Afficherarbre (Rac : in TA_Squel) is
    -- voir format d'affichage
    begin
-    null;
+    if rac /= null then
+      Afficherarbre (rac.all.gauche);
+      ecrire_ligne (to_string (rac.all.squelette));
+      AffichlistMots (rac.all.listMots);
+      a_la_ligne;
+      Afficherarbre (rac.all.droite);
+    end if;
    end Afficherarbre;
    -------------------------------------------------------------------------
    procedure Copie (Fmot : in out P_Mot_Io.File_Type; Liste : in TA_Mot) is
@@ -67,13 +91,20 @@ package body p_arbre is
    -- utilisee par la procédure Sauvefichier pour copier une liste 
    -- de mots dans le fichier dico.dat   
    begin
-    null;
+    if liste /= null then
+      write (fmot, liste.all.mot);
+      Copie (fmot, liste.all.suivant);
+    end if;
    end Copie;
    -------------------------------------------------------------------------
    procedure Sauvefichier (Fmot : in out P_Mot_Io.File_Type; Racine : in Ta_Squel) is
    -- {Fmot ouvert en écriture} => {tous les mots de l'arbre ont été copiés dans fmot}
    begin
-    null;
+    if Racine /= null then
+      Sauvefichier (fmot, Racine.all.gauche);
+      Copie (fmot, Racine.all.listMots);
+      Sauvefichier (fmot, Racine.all.droite);
+    end if;
    end Sauvefichier;
    
    -- **********************************************************************
@@ -82,8 +113,13 @@ package body p_arbre is
    -- {} => {si MOT n'était pas présent dans le dictionnaire, il a été inséré
    --       dans la liste des mots de même squelette, Nouveau = vrai,
    --       sinon Nouveau = faux}
+    forme : tr_mot;
+    p : ta_squel;
    begin
-    null;
+    Calcsquel (mot, forme);
+    Ajoutsquel (racine, forme);
+    p := Cherchesquel (racine, forme);
+    AjoutMot(p.all.listMots, mot, Nouveau);
    end Insermot;
 
    procedure AffichDico is
@@ -94,34 +130,62 @@ package body p_arbre is
    --	            mot mot
    --        squelettemot ... etc. 
    begin
-    null;
+    Afficherarbre(racine);
    end AffichDico;
   
    procedure Listmots (MOT : in TR_Mot) is
    -- {} => {La liste des mots de même squelette que MOT est affichée}
    --        Utile pour proposer une alternative au mot saisi dans le cas
    --        où le squelette de ce mot est présent dans l'arbre
+    forme : tr_mot;
+    p : ta_squel;
    begin
-    null;
+    Calcsquel (mot, forme);
+    p := Cherchesquel (racine, forme);
+    if p = null then
+      ecrire_ligne ("Aucune proposition");
+    else
+      AffichlistMots (p.all.listMots);
+      a_la_ligne;
+    end if;
    end ListMots;
 
    function Verifmot (MOT : in TR_Mot) return Boolean is
    -- {} => {résultat = vrai si le mot est dans le dictionnaire, faux sinon}
+    forme : tr_mot;
+    p : ta_squel;
    begin
-    return false;
+    Calcsquel (mot, forme);
+    p := Cherchesquel (racine, forme);
+    if p = null then
+      return false;
+    else
+      return Cherchemot(p.all.listMots, mot);
+    end if;
    end Verifmot;
    
    procedure Charge is
    -- {} => {le fichier fdico.dat est chargé en memoire sous forme d'arbre} 
+    f : P_Mot_Io.File_Type;
+    m : tr_mot;
+    foo : boolean;
    begin
-    null;
+    open (f, in_file, "fdico.dat");
+    while not end_of_file (f) loop
+      read (f, m);
+      Insermot (m, foo);
+    end loop;
+    close (f);
    end Charge;
 
    procedure Sauve is
    -- {} => {l'ensemble des mots de l'arbre est copié dans le fichier fdico.dat 
    --        suite à l'insertion de nouveaux mots dans l'arbre
+    f : P_Mot_Io.File_Type;
    begin
-    null;
+    create (f, out_file, "fdico.dat");
+    Sauvefichier (f, racine);
+    close (f);
    end Sauve;
 end p_arbre;
 

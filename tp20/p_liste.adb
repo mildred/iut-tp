@@ -63,7 +63,7 @@ package body p_liste is
    procedure AffichlistMots (ListMots : in TA_Mot ) is
    begin
     if ListMots /= null then
-      ecrire_ligne (to_string (ListMots.all.mot));
+      ecrire (" " & to_string (ListMots.all.mot));
       AffichlistMots (ListMots.all.suivant);
     end if;
    end AffichlistMots;
